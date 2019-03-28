@@ -16,15 +16,11 @@ def createCylinder(radius, height, imax=20, jmax=20):
 
 
 class FFD():
-    def __init__(self):
+    def __init__(self, geometry=None):
 
         self.lx = 0.0
         self.ly = 0.4
         self.lz = 0.5
-
-        self.offx = 0.0
-        self.offy = 0.0
-        self.offz = 0.0
 
         self.l = 3
         self.m = 3
@@ -42,28 +38,44 @@ class FFD():
         self.t = None
         self.u = None
 
-    def createLattice(self):
+        self.geometry = geometry
+        self.originalShape = None
+
+    def createLattice(self, offx=0.1, offy=0.1, offz=0.1):
         """
         Creates a simple reclinear block lattice
         :return:
         """
+
         self.Px = np.zeros((self.l,self.m,self.n))
         self.Py = np.zeros((self.l,self.m,self.n))
         self.Pz = np.zeros((self.l,self.m,self.n))
 
+        X,Y,Z = self.geometry[0], self.geometry[1], self.geometry[2]
+        self.originalShape = X.shape
+
+        dx = (X.max() - X.min())
+        dy = (Y.max() - Y.min())
+        dz = (Z.max() - Z.min())
+
+        self.lx = (2 * offx + 1.0) * dx
+        self.ly = (2 * offy + 1.0) * dy
+        self.lz = (2 * offz + 1.0) * dz
+
+
         for i in range(self.l):
             for j in range(self.m):
                 for k in range(self.n):
-                    self.Px[i, j, k] = self.offx + self.lx * i / (self.l - 1)
-                    self.Py[i, j, k] = self.offy + self.ly * j / (self.m - 1)
-                    self.Pz[i, j, k] = self.offz + self.lz * k / (self.n - 1)
+                    self.Px[i, j, k] = X.min() -dx*offx + self.lx * i / (self.l - 1)
+                    self.Py[i, j, k] = Y.min() -dy*offy + self.ly * j / (self.m - 1)
+                    self.Pz[i, j, k] = Z.min() -dz*offz + self.lz * k / (self.n - 1)
 
         self.X0 = self.Px[0, 0, 0]
         self.Y0 = self.Py[0, 0, 0]
         self.Z0 = self.Pz[0, 0, 0]
 
 
-    def calcSTU(self, xg, yg, zg):
+    def calcSTU(self):
         """
         Calc STU coordinates
         :param xg:
@@ -72,12 +84,16 @@ class FFD():
         :return:
         """
 
-        self.s = (xg - self.X0)/self.lx
-        self.t = (yg - self.Y0)/self.ly
-        self.u = (zg - self.Z0)/self.lz
+        self.s = (self.geometry[0].flatten() - self.X0)/self.lx
+        self.t = (self.geometry[1].flatten() - self.Y0)/self.ly
+        self.u = (self.geometry[2].flatten() - self.Z0)/self.lz
 
 
     def calcDeformation(self):
+        """
+        Calculate the deformed geometry
+        :return:
+        """
 
         Xdef = np.zeros((self.s.shape[0], 3))
 
@@ -90,7 +106,7 @@ class FFD():
                                      FFD.binomial(self.n-1,k)*np.power(1-self.u[p], self.n-1-k)*np.power(self.u[p],k) * \
                                      np.asarray([self.Px[i,j,k], self.Py[i,j,k], self.Pz[i,j,k]])
 
-        return Xdef
+        return Xdef[:,0].reshape(self.originalShape), Xdef[:,1].reshape(self.originalShape), Xdef[:,2].reshape(self.originalShape)
 
     @staticmethod
     def binomial(n, k):
@@ -111,4 +127,36 @@ class FFD():
 
 
     def plotLattic(self, ax):
+        """
+        Plot the lattice
+        :param ax:
+        :return:
+        """
+        for i in range(self.l):
+            for j in range(self.m):
+                for k in range(self.n):
+                    try:
+                        _vx = [self.Px[i + 1, j, k], self.Px[i, j, k]]
+                        _vy = [self.Py[i + 1, j, k], self.Py[i, j, k]]
+                        _vz = [self.Pz[i + 1, j, k], self.Pz[i, j, k]]
+                        ax.plot(_vx,_vy,_vz, 'k-')
+                    except:
+                        pass
+
+                    try:
+                        _vx = [self.Px[i, j + 1, k], self.Px[i, j, k]]
+                        _vy = [self.Py[i, j + 1, k], self.Py[i, j, k]]
+                        _vz = [self.Pz[i, j + 1, k], self.Pz[i, j, k]]
+                        ax.plot(_vx,_vy,_vz, 'k-')
+                    except:
+                        pass
+
+                    try:
+                        _vx = [self.Px[i, j, k + 1], self.Px[i, j, k]]
+                        _vy = [self.Py[i, j, k + 1], self.Py[i, j, k]]
+                        _vz = [self.Pz[i, j, k + 1], self.Pz[i, j, k]]
+                        ax.plot(_vx,_vy,_vz, 'k-')
+                    except:
+                        pass
+
         ax.scatter(self.Px, self.Py, self.Pz, c='r')

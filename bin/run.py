@@ -3,41 +3,36 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from src.ffd import createCylinder
 from src.ffd import FFD
+plt.style.use('ggplot')
+
 
 if __name__ == "__main__":
 
-    X = createCylinder(radius=0.4, height=1.0)
+    X = createCylinder(radius=0.4, height=1.0, imax=40, jmax=20)
 
     ### Control lattice ###
-    ffd = FFD()
-    ffd.lx = 1.2
-    ffd.ly = 1.2
-    ffd.lz = 1.2
-
-    ffd.offx = -0.6
-    ffd.offy = -0.6
-    ffd.offz = -0.1
-
+    ffd = FFD(geometry=[X[:, :, 0], X[:, :, 1], X[:, :, 2]])
     ffd.l = 3
-    ffd.n = 2
-    ffd.m = 2
-
+    ffd.n = 3
+    ffd.m = 3
 
     ffd.createLattice()
-    ffd.calcSTU(X[:, :, 0].flatten(), X[:, :, 1].flatten(), X[:, :, 2].flatten())
-    ffd.Px[0,-1,1] = ffd.Px[0,-1,1]-2.5
+    ffd.calcSTU()
 
-    Xdef = ffd.calcDeformation()
+    ffd.Px[0,-1,1] = ffd.Px[0,-1,1]-0.8
 
-
+    Xdef,Ydef,Zdef = ffd.calcDeformation()
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+
+    #ax.plot_wireframe(X[:, :, 0], X[:, :, 1], X[:, :, 2])
+    ax.plot_surface(Xdef,Ydef,Zdef, antialiased=False)
 
     ffd.plotLattic(ax)
-
-    ax.plot_wireframe(X[:, :, 0], X[:, :, 1], X[:, :, 2])
-    ax.plot_surface(Xdef[:,0].reshape(20,20), Xdef[:,1].reshape(20,20), Xdef[:,2].reshape(20,20))
 
     plt.axis('equal')
     plt.show()
