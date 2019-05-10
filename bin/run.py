@@ -8,7 +8,8 @@ from src.geomturbo import GeomTurbo
 plt.style.use('ggplot')
 
 
-gtfile = "/share/proj-mlhw01/lgt/4000F10/peere00c/190506_aeromechOpti/GAT3003_SID_newExtract/1dir_grid/dir_s3/autogrid.geomTurbo"
+gtfile = ""
+
 gt = GeomTurbo(gtfile=gtfile, rotate=True)
 gt.readGeomturbofile()
 
@@ -29,10 +30,13 @@ ffd.calcSTU()
 
 #ffd.Px[0, -1, 1] = ffd.Px[0, -1, 1] - 0.3
 
-ffd.rotateLattice(1, deg=-30, scale=0.8, offx=0.01, offy=-0.05)
-
+ffd.rotateLattice(0, deg=-20, scale=0.9, offx=0.00, offy=-0.00)
+ffd.rotateLattice(1, deg=-40, scale=0.2, offx=0.00, offy=-0.06)
 
 geomsDef = ffd.calcDeformation()
+
+gt.processEqualizedGeom(geomsDef[0],geomsDef[1])
+gt.writeGeomturbofile()
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')

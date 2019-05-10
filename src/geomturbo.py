@@ -181,7 +181,7 @@ class GeomTurbo(object):
     def equalizeGeometry(self,res=100):
         """
         Creates same resolution for each section
-        :return:
+        :return: SS and PS geometry
         """
         import matplotlib.pyplot as plt
         import numpy as np
@@ -202,6 +202,20 @@ class GeomTurbo(object):
                 X[:,nsec, :, s]=np.asarray(geomEqual).T
 
         return X[:, :, :, 0], X[:, :, :, 1]
+
+    def processEqualizedGeom(self, XSS, XPS):
+        """
+
+        :param XSS:
+        :param XPS:
+        :return:
+        """
+        X = [XSS, XPS]
+        for nsec in range(self.nsections):
+            for s,side in zip((0,1),("ss","ps")):
+
+                self.geometry[nsec][s] = [X[s][0][:,nsec],X[s][1][:,nsec],X[s][2][:,nsec]]
+
 
     @staticmethod
     def resolution(res, letrans=0.2, tetrans=0.2):
@@ -224,7 +238,6 @@ class GeomTurbo(object):
         sinter = np.hstack((sle,smid[1:],ste[1:]))
 
         return sinter
-
 
     @staticmethod
     def bspline(cv, n=100, degree=3):
