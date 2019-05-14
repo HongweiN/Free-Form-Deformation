@@ -77,7 +77,7 @@ class FFD(object):
         self.Z0 = self.Pz[0, 0, 0]
 
 
-    def rotateLattice(self, layer, deg=0.0, scale=1.0, offx=0.0, offy=0.0):
+    def rotateLattice(self, layer, deg=0.0, scalex=1.0, scaley=1.0, offx=0.0, offy=0.0):
         """
 
         :param layer:
@@ -93,8 +93,8 @@ class FFD(object):
 
         for i in range(self.l):
             for j in range(self.m):
-                x = center[0] + offx + scale*((self.Px[i, j, layer] - center[0]) * np.cos( rad) + (self.Py[i, j, layer] - center[1]) * np.sin(rad))
-                y = center[1] + offy+ scale*((self.Px[i, j, layer] - center[0]) * np.sin(-rad) + (self.Py[i, j, layer] - center[1]) * np.cos(rad))
+                x = center[0] + offx + scalex*((self.Px[i, j, layer] - center[0]) * np.cos( rad) + (self.Py[i, j, layer] - center[1]) * np.sin(rad))
+                y = center[1] + offy + scaley*((self.Px[i, j, layer] - center[0]) * np.sin(-rad) + (self.Py[i, j, layer] - center[1]) * np.cos(rad))
                 self.Px[i, j, layer], self.Py[i, j, layer] = x, y
 
 

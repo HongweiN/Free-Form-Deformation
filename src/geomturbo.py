@@ -21,6 +21,11 @@ class GeomTurbo(object):
         self.turniningdirection = 1
         self.invert = False
 
+        self.hubext = 0.03
+        self.shroudext = 0.03
+        self.clipLE = True
+        self.clipTE = True
+
     def readGeomturbofile(self):
         """
         Takes a geomturbo file and creates a dictionary out of it
@@ -213,8 +218,14 @@ class GeomTurbo(object):
         X = [XSS, XPS]
         for nsec in range(self.nsections):
             for s,side in zip((0,1),("ss","ps")):
+                x,y,z = X[s][0][:,nsec],X[s][1][:,nsec],X[s][2][:,nsec]
 
-                self.geometry[nsec][s] = [X[s][0][:,nsec],X[s][1][:,nsec],X[s][2][:,nsec]]
+                if s == 1 and self.clipLE:
+                    x[0],y[0],z[0]  = X[0][0][0,nsec], X[0][1][0,nsec],X[0][2][0,nsec]
+                if s == 1 and self.clipTE:
+                    x[-1], y[-1], z[-1] = X[0][0][-1, nsec], X[0][1][-1, nsec], X[0][2][-1, nsec]
+
+                self.geometry[nsec][s] = [x,y,z]
 
 
     @staticmethod
@@ -286,8 +297,8 @@ class GeomTurbo(object):
         line = line + "TYPE                             GEOMTURBO\n"
         line = line + "GEOMETRY_MODIFIED                0\n"
         line = line + "GEOMETRY TURBO VERSION           5\n"
-        line = line + "blade_expansion_factor_hub       0.01\n"
-        line = line + "blade_expansion_factor_shroud    0.01\n"
+        line = line + "blade_expansion_factor_hub       {}\n".format(self.hubext)
+        line = line + "blade_expansion_factor_shroud    {}\n".format(self.shroudext)
         line = line + "intersection_parasolid\n"
         line = line + "intersection_npts    10\n"
         line = line + "intersection_control 0\n"
@@ -296,6 +307,7 @@ class GeomTurbo(object):
         line = line + "data_reduction_angle_tolerance        90\n"
         line = line + "units		                      1\n"
         line = line + "number_of_blades		          " + str(self.nblades) + "\n"
+
 
         for s, side in enumerate(["suction", "pressure"]):
             line = line + side + "\n" + "SECTIONAL\n" + " " + str(self.nsections) + "\n"

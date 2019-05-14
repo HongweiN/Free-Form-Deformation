@@ -1,14 +1,21 @@
-import numpy as np
+#!/swd/SPost/virtualenv/conda/envs/SPost_Py2/bin/python
+
+
+# /usw/spgvenvs/py_core/2.0.0/rhel7/bin/python
+import sys
+import os
+
+sys.path.insert(0,os.getcwd())
+
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from src.ffd import createCylinder
 from src.ffd import FFD
 from src.geomturbo import GeomTurbo
+from mpl_toolkits.mplot3d import Axes3D
 
 plt.style.use('ggplot')
 
 
-gtfile = ""
+gtfile = sys.argv[1]
 
 gt = GeomTurbo(gtfile=gtfile, rotate=True)
 gt.readGeomturbofile()
@@ -30,8 +37,9 @@ ffd.calcSTU()
 
 #ffd.Px[0, -1, 1] = ffd.Px[0, -1, 1] - 0.3
 
-ffd.rotateLattice(0, deg=-20, scale=0.9, offx=0.00, offy=-0.00)
-ffd.rotateLattice(1, deg=-40, scale=0.2, offx=0.00, offy=-0.06)
+ffd.rotateLattice(0, deg=-40, scalex=0.9, scaley=1.0, offx=0.00, offy=-0.00)
+ffd.rotateLattice(1, deg=40, scalex=0.5, scaley=1.0, offx=0.00, offy=-0.16)
+ffd.rotateLattice(2, deg=-40, scalex=0.9, scaley=1.0, offx=0.00, offy=-0.06)
 
 geomsDef = ffd.calcDeformation()
 
